@@ -3,8 +3,6 @@ kind: RoleBinding
 metadata:
   name: 'backstage:admin'
   namespace: backstage
-  annotations:
-    argocd.argoproj.io/sync-options: 'Force=true,Replace=true'
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -19,8 +17,6 @@ kind: RoleBinding
 metadata:
   name: 'backstage:dev'
   namespace: backstage
-  annotations:
-    argocd.argoproj.io/sync-options: 'Force=true,Replace=true'
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -35,8 +31,6 @@ kind: RoleBinding
 metadata:
   name: 'backstage:admin'
   namespace: backstage-tailscale
-  annotations:
-    argocd.argoproj.io/sync-options: 'Force=true,Replace=true'
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -51,8 +45,6 @@ kind: RoleBinding
 metadata:
   name: 'backstage:dev'
   namespace: backstage-tailscale
-  annotations:
-    argocd.argoproj.io/sync-options: 'Force=true,Replace=true'
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
