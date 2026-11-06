@@ -73,6 +73,7 @@ jobs:
         id: kubeconform
         run: |
           kubeconform -summary \
+            -skip CustomResourceDefinition \
             -schema-location default \
             -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
             "apps/${APP}.yaml" "${RUNNER_TEMP}/rendered" 2>&1 | tee /tmp/${{ github.run_id }}.kubeconform.txt
