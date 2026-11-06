@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phpldapadmin
+  namespace: backstage
+  labels:
+    app.kubernetes.io/name: phpldapadmin
+    backstage.uk/component: phpldapadmin
+spec:
+  selector:
+    matchLabels:
+      backstage.uk/component: phpldapadmin
+  template:
+    metadata:
+      labels:
+        backstage.uk/component: phpldapadmin
+    spec:
+      containers:
+        - name: app
+          image: phpldapadmin/phpldapadmin:unknown
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: APP_TIMEZONE
+              value: 'Europe/London'
+            - name: LOG_CHANNEL
+              value: 'stderr'
+            - name: LDAP_HOST
+              value: 'openldap'
+            - name: LDAP_PORT
+              value: '1389'
+            - name: LDAP_BASE_DN
+              value: 'dc=ldap,dc=bts-crew,dc=com'
+            - name: LDAP_ALLOW_GUEST
+              value: 'false'
+            - name: LDAP_LOGIN_ATTR
+              value: 'uid'
+            - name: LDAP_USERNAME
+              value: 'cn=admin,dc=ldap,dc=bts-crew,dc=com'
+            - name: LDAP_LOGIN_OBJECTCLASS
+              value: 'inetOrgPerson'
+          envFrom:
+            - secretRef:
+                name: phpldapadmin
+          resources:
+            requests:
+              memory: '128Mi'
+            limits:
+              memory: '256Mi'
+      nodeSelector:
+        bnjns.uk/owner: 'backstage'
+      tolerations:
+        - key: 'bnjns.uk/reserved-for'
+          operator: 'Equal'
+          value: 'backstage'
+          effect: 'NoSchedule'

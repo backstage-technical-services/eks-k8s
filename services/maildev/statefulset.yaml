@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: maildev
+  namespace: backstage
+  labels:
+    app.kubernetes.io/name: maildev
+    backstage.uk/component: maildev
+    bnjns.uk/app: maildev
+spec:
+  serviceName: maildev
+  replicas: 1
+  selector:
+    matchLabels:
+      backstage.uk/component: maildev
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: maildev
+        backstage.uk/component: maildev
+        bnjns.uk/app: maildev
+        bnjns.uk/owner: 'backstage'
+    spec:
+      containers:
+        - name: maildev
+          image: maildev/maildev:unknown
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MAILDEV_SMTP_PORT
+              value: '1025'
+            - name: MAILDEV_WEB_PORT
+              value: '1080'
+          resources:
+            requests:
+              memory: '100Mi'
+            limits:
+              memory: '100Mi'
+      nodeSelector:
+        bnjns.uk/owner: 'backstage'
+      tolerations:
+        - key: 'bnjns.uk/reserved-for'
+          operator: 'Equal'
+          value: 'backstage'
+          effect: 'NoSchedule'

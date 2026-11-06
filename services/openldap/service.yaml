@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: openldap
+  namespace: backstage
+  labels:
+    app.kubernetes.io/name: openldap
+    backstage.uk/component: openldap
+  annotations:
+    tailscale.com/expose: 'true'
+    tailscale.com/proxy-class: 'backstage'
+spec:
+  type: ClusterIP
+  selector:
+    backstage.uk/component: openldap
+  ports:
+    - name: default
+      port: 1389
+      targetPort: 1389
+    - name: privileged
+      port: 389
+      targetPort: 1389

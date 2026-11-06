@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb-10-4
+  namespace: backstage
+  labels:
+    app.kubernetes.io/name: database-mariadb-10-4
+    backstage.uk/component: database
+    backstage.uk/engine: mariadb
+    backstage.uk/version: '10.4'
+spec:
+  type: ClusterIP
+  selector:
+    backstage.uk/component: database
+    backstage.uk/engine: mariadb
+    backstage.uk/version: '10.4'
+  ports:
+    - port: 3306

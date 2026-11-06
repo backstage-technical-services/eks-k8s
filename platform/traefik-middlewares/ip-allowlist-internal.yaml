@@ -1,0 +1,9 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ip-allowlist-internal
+  namespace: backstage
+spec:
+  ipWhiteList:
+    sourceRange:
+      - '172.20.0.0/16'

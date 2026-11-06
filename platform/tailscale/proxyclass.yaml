@@ -1,0 +1,20 @@
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyClass
+metadata:
+  name: backstage
+  labels:
+    bnjns.uk/owner: 'backstage'
+  annotations:
+    argocd.argoproj.io/sync-options: 'SkipDryRunOnMissingResource=true'
+spec:
+  statefulSet:
+    pod:
+      labels:
+        bnjns.uk/owner: 'backstage'
+      nodeSelector:
+        bnjns.uk/owner: 'backstage'
+      tolerations:
+        - key: 'bnjns.uk/reserved-for'
+          operator: 'Equal'
+          value: 'backstage'
+          effect: 'NoSchedule'

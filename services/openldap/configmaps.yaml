@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openldap-ldifs-bootstrap
+  namespace: backstage
+  labels:
+    app.kubernetes.io/name: openldap
+    backstage.uk/component: openldap
+data:
+  01-base-tree.ldif: |
+    dn: dc=ldap,dc=bts-crew,dc=com
+    objectClass: dcObject
+    objectClass: organization
+    dc: ldap
+    o: example
+
+    dn: ou=users,dc=ldap,dc=bts-crew,dc=com
+    objectClass: organizationalUnit
+    ou: users
+
+    dn: ou=groups,dc=ldap,dc=bts-crew,dc=com
+    objectClass: organizationalUnit
+    ou: groups
+  02-su2bc-user.ldif: |
+    dn: uid=su2bc,ou=users,dc=ldap,dc=bts-crew,dc=com
+    objectClass: inetOrgPerson
+    uid: su2bc
+    sn: su2bc
+    cn: su2bc
+  03-admin-group.ldif: |
+    dn: cn=admin,ou=groups,dc=ldap,dc=bts-crew,dc=com
+    objectClass: posixGroup
+    cn: admin
+    gidNumber: 1001
+    memberUid: su2bc
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openldap-ldifs-misc
+  namespace: backstage
+  labels:
+    app.kubernetes.io/name: openldap
+    backstage.uk/component: openldap
+data:
+  01-acls.ldif: |
+    dn: olcDatabase={2}mdb,cn=config
+    changetype: modify
+    add: olcAccess
+    olcAccess: to dn.children="dc=ldap,dc=bts-crew,dc=com"
+      by self write
+      by group.exact="cn=admin,ou=groups,dc=ldap,dc=bts-crew,dc=com" manage
+      by * auth

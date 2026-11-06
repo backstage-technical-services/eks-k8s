@@ -1,0 +1,10 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: rate-limit
+  namespace: backstage
+spec:
+  rateLimit:
+    average: 50
+    burst: 1000
+    period: '1s'

@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: backstage-database-postgres-16
+  labels:
+    app.kubernetes.io/name: database-postgres-16
+    backstage.uk/component: database
+    backstage.uk/engine: postgres
+    backstage.uk/version: '16'
+    backstage.uk/storage-name: database-postgres-16
+  annotations:
+    argocd.argoproj.io/sync-options: 'Delete=false,Prune=false'
+spec:
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  storageClassName: aws-efs
+  persistentVolumeReclaimPolicy: Retain
+  capacity:
+    storage: 5Gi
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: 'fs-05929b3d75352ac77::fsap-0446cf8754d287202'
+    volumeAttributes:
+      encryptInTransit: 'true'
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: database-postgres-16
+  namespace: backstage
+  labels:
+    app.kubernetes.io/name: database-postgres-16
+    backstage.uk/component: database
+    backstage.uk/engine: postgres
+    backstage.uk/version: '16'
+    backstage.uk/storage-name: database-postgres-16
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: aws-efs
+  resources:
+    requests:
+      storage: 5Gi
+  selector:
+    matchLabels:
+      backstage.uk/component: database
+      backstage.uk/engine: postgres
+      backstage.uk/version: '16'
+      backstage.uk/storage-name: database-postgres-16

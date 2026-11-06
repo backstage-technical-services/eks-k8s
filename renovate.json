@@ -1,0 +1,26 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    "schedule:weekly"
+  ],
+  "labels": ["dependencies"],
+  "argocd": {
+    "managerFilePatterns": ["/apps/.+\\.ya?ml$/"]
+  },
+  "packageRules": [
+    {
+      "description": "Skip patch updates",
+      "matchUpdateTypes": ["patch"],
+      "enabled": false
+    },
+    {
+      "description": "Database engine upgrades need a data migration; do them by hand",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["mariadb", "postgres"],
+      "enabled": false
+    }
+  ]
+}

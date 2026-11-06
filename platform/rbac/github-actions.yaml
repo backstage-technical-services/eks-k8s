@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: github-actions
+  namespace: backstage
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+metadata:
+  name: github-actions-service-account-token
+  namespace: backstage
+  annotations:
+    kubernetes.io/service-account.name: github-actions
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: 'backstage:github-actions'
+rules:
+  - apiGroups: ['']
+    resources: ['persistentvolumes', 'persistentvolumeclaims']
+    verbs: ['*']
+  - apiGroups: ['certificates.k8s.io']
+    resources: ['certificatesigningrequests']
+    verbs: ['create', 'get']
+  - apiGroups: ['']
+    resources: ['services', 'secrets', 'configmaps']
+    verbs: ['list', 'get', 'watch']
+  - apiGroups: ['apps']
+    resources: ['deployments', 'replicasets', 'statefulsets']
+    verbs: ['list', 'get', 'watch']
+  - apiGroups: ['batch']
+    resources: ['cronjobs']
+    verbs: ['list', 'get', 'watch']
+  - apiGroups: ['networking.k8s.io']
+    resources: ['ingresses']
+    verbs: ['list', 'get', 'watch']
+  - apiGroups: ['external-secrets.io']
+    resources: ['externalsecrets']
+    verbs: ['list', 'get', 'watch']
+  - apiGroups: ['cert-manager.io']
+    resources: ['certificates']
+    verbs: ['list', 'get', 'watch']
+  - apiGroups: ['traefik.io']
+    resources: ['ingressroutes']
+    verbs: ['list', 'get', 'watch']
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: 'backstage:github-actions'
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: 'backstage:github-actions'
+subjects:
+  - kind: ServiceAccount
+    name: github-actions
+    namespace: backstage
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: 'backstage:github-actions'
+  namespace: backstage
+rules:
+  - apiGroups: ['']
+    resources: ['services', 'secrets', 'configmaps']
+    verbs: ['*']
+  - apiGroups: ['apps']
+    resources: ['replicasets', 'statefulsets', 'deployments']
+    verbs: ['*']
+  - apiGroups: ['batch']
+    resources: ['cronjobs']
+    verbs: ['*']
+  - apiGroups: ['networking.k8s.io']
+    resources: ['ingresses']
+    verbs: ['*']
+  - apiGroups: ['external-secrets.io']
+    resources: ['externalsecrets']
+    verbs: ['*']
+  - apiGroups: ['cert-manager.io']
+    resources: ['certificates']
+    verbs: ['*']
+  - apiGroups: ['traefik.io']
+    resources: ['ingressroutes']
+    verbs: ['*']
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: 'backstage:github-actions'
+  namespace: backstage
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: 'backstage:github-actions'
+subjects:
+  - kind: ServiceAccount
+    name: github-actions
+    namespace: backstage

@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: backstage-openldap
+  labels:
+    app.kubernetes.io/name: openldap
+    backstage.uk/component: openldap
+    backstage.uk/storage-name: openldap
+  annotations:
+    argocd.argoproj.io/sync-options: 'Delete=false,Prune=false'
+spec:
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  storageClassName: aws-efs
+  persistentVolumeReclaimPolicy: Retain
+  capacity:
+    storage: 10Gi
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: 'fs-05929b3d75352ac77::fsap-0c8770498832d4e68'
+    volumeAttributes:
+      encryptInTransit: 'true'
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: openldap
+  namespace: backstage
+  labels:
+    app.kubernetes.io/name: openldap
+    backstage.uk/component: openldap
+    backstage.uk/storage-name: openldap
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: aws-efs
+  resources:
+    requests:
+      storage: 10Gi
+  selector:
+    matchLabels:
+      backstage.uk/component: openldap
+      backstage.uk/storage-name: openldap

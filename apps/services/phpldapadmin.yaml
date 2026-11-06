@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: phpldapadmin
+  namespace: backstage-argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '30'
+spec:
+  project: backstage
+  source:
+    repoURL: https://github.com/backstage-technical-services/eks-k8s.git
+    targetRevision: HEAD
+    path: services/phpldapadmin
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: backstage
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
+  syncPolicy:
+    syncOptions:
+      - RespectIgnoreDifferences=true
+      - ServerSideApply=true

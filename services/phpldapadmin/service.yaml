@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: phpldapadmin
+  namespace: backstage
+  labels:
+    app.kubernetes.io/name: phpldapadmin
+    backstage.uk/component: phpldapadmin
+  annotations:
+    tailscale.com/expose: 'true'
+    tailscale.com/proxy-class: 'backstage'
+spec:
+  type: ClusterIP
+  selector:
+    backstage.uk/component: phpldapadmin
+  ports:
+    - port: 8080

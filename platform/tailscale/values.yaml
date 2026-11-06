@@ -1,0 +1,8 @@
+operatorConfig:
+  nodeSelector:
+    bnjns.uk/owner: 'backstage'
+  tolerations:
+    - key: 'bnjns.uk/reserved-for'
+      operator: 'Equal'
+      value: 'backstage'
+      effect: 'NoSchedule'

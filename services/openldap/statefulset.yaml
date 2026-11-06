@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: openldap
+  namespace: backstage
+  labels:
+    app.kubernetes.io/name: openldap
+    backstage.uk/component: openldap
+spec:
+  serviceName: openldap
+  replicas: 1
+  selector:
+    matchLabels:
+      backstage.uk/component: openldap
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: openldap
+        backstage.uk/component: openldap
+        bnjns.uk/owner: 'backstage'
+    spec:
+      containers:
+        - name: openldap
+          image: bitnamilegacy/openldap:unknown
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: LDAP_CONFIG_ADMIN_ENABLED
+              value: 'yes'
+            - name: LDAP_CONFIG_ADMIN_USERNAME
+              value: 'admin'
+            - name: LDAP_ADMIN_USERNAME
+              value: 'admin'
+            - name: LDAP_ROOT
+              value: 'dc=ldap,dc=bts-crew,dc=com'
+            - name: LDAP_ADMIN_DN
+              value: 'cn=admin,dc=ldap,dc=bts-crew,dc=com'
+            - name: LDAP_SKIP_DEFAULT_TREE
+              value: 'yes'
+            - name: LDAP_CUSTOM_LDIF_DIR
+              value: '/ldifs/bootstrap'
+            - name: LDAP_CONFIGURE_PPOLICY
+              value: 'yes'
+            - name: LDAP_PPOLICY_HASH_CLEARTEXT
+              value: 'yes'
+          envFrom:
+            - secretRef:
+                name: openldap
+          resources:
+            requests:
+              memory: '128Mi'
+            limits:
+              memory: '265Mi'
+          volumeMounts:
+            - name: ldifs-bootstrap
+              mountPath: /ldifs/bootstrap
+            - name: ldifs-misc
+              mountPath: /ldifs/misc
+            - name: data
+              mountPath: /bitnami/openldap
+      volumes:
+        - name: ldifs-bootstrap
+          configMap:
+            name: openldap-ldifs-bootstrap
+        - name: ldifs-misc
+          configMap:
+            name: openldap-ldifs-misc
+        - name: data
+          persistentVolumeClaim:
+            claimName: openldap
+      nodeSelector:
+        bnjns.uk/owner: 'backstage'
+      tolerations:
+        - key: 'bnjns.uk/reserved-for'
+          operator: 'Equal'
+          value: 'backstage'
+          effect: 'NoSchedule'

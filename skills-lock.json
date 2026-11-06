@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "git-commit": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/git-commit/SKILL.md",
+      "computedHash": "2607fc60629b82b257136dd2a7a373f0a4466c0b49df7746d845d59313c99b21"
+    },
+    "kubesearch": {
+      "source": "ionfury/homelab",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/kubesearch/SKILL.md",
+      "computedHash": "391f792ca24ef7a6fee6c328ab1e25230f6508d5191d13c9613c3534439ca8fe"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-16
+  namespace: backstage
+  labels:
+    app.kubernetes.io/name: database-postgres-16
+    backstage.uk/component: database
+    backstage.uk/engine: postgres
+    backstage.uk/version: '16'
+spec:
+  type: ClusterIP
+  selector:
+    backstage.uk/component: database
+    backstage.uk/engine: postgres
+    backstage.uk/version: '16'
+  ports:
+    - port: 5432
