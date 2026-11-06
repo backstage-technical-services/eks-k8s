@@ -1,0 +1,70 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: application
+spec:
+  rules:
+    - name: namespace
+      match:
+        any:
+          - resources:
+              kinds: ['Application']
+      validate:
+        failureAction: Enforce
+        message: 'Applications must live in the backstage-argocd namespace'
+        pattern:
+          metadata:
+            namespace: 'backstage-argocd'
+    - name: project
+      match:
+        any:
+          - resources:
+              kinds: ['Application']
+      validate:
+        failureAction: Enforce
+        message: 'Applications must use the backstage project'
+        pattern:
+          spec:
+            project: 'backstage'
+    - name: automated-sync
+      match:
+        any:
+          - resources:
+              kinds: ['Application']
+      validate:
+        failureAction: Enforce
+        message: 'Applications must sync automatically with prune: true and selfHeal: true'
+        pattern:
+          spec:
+            syncPolicy:
+              automated:
+                prune: true
+                selfHeal: true
+    - name: server-side-apply
+      match:
+        any:
+          - resources:
+              kinds: ['Application']
+      validate:
+        failureAction: Enforce
+        message: 'syncOptions must include ServerSideApply=true'
+        deny:
+          conditions:
+            any:
+              - key: 'ServerSideApply=true'
+                operator: AnyNotIn
+                value: '{{ request.object.spec.syncPolicy.syncOptions || `[]` }}'
+    - name: no-create-namespace
+      match:
+        any:
+          - resources:
+              kinds: ['Application']
+      validate:
+        failureAction: Enforce
+        message: 'syncOptions must not include CreateNamespace=true'
+        deny:
+          conditions:
+            any:
+              - key: 'CreateNamespace=true'
+                operator: AnyIn
+                value: '{{ request.object.spec.syncPolicy.syncOptions || `[]` }}'

@@ -1,0 +1,20 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: images
+spec:
+  rules:
+    - name: tag-set-in-kustomization
+      match:
+        any:
+          - resources:
+              kinds: ['Pod']
+      validate:
+        failureAction: Enforce
+        message: 'Images tagged :unknown need a newTag in kustomization.yaml'
+        pattern:
+          spec:
+            =(initContainers):
+              - image: '!*:unknown'
+            containers:
+              - image: '!*:unknown'

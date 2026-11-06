@@ -1,0 +1,175 @@
+name: Checks
+
+on:
+  pull_request_target:
+    branches: [main]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  app-matrix:
+    name: App matrix
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          allow-unsafe-pr-checkout: true
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Use trusted files from main
+        run: |
+          git fetch --depth=1 origin "${GITHUB_SHA}"
+          git restore --source=FETCH_HEAD --staged --worktree -- scripts
+      - id: set-matrix
+        name: Determine app matrix
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: scripts/detect-changed-apps.sh
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+  kubeconform:
+    name: kubeconform
+    runs-on: ubuntu-latest
+    needs: [app-matrix]
+    if: ${{ needs.app-matrix.outputs.matrix != '[]' }}
+    permissions:
+      contents: read
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJSON(needs.app-matrix.outputs.matrix) }}
+    env:
+      APP: ${{ matrix.app }}
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          allow-unsafe-pr-checkout: true
+          persist-credentials: false
+      - name: Use trusted files from main
+        run: |
+          git fetch --depth=1 origin "${GITHUB_SHA}"
+          git restore --source=FETCH_HEAD --staged --worktree -- scripts
+      - uses: azure/setup-helm@v5
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+      - run: go install github.com/yannh/kubeconform/cmd/kubeconform@v0.8.0
+      - name: render
+        id: render
+        run: scripts/render.sh "apps/${APP}.yaml" "${RUNNER_TEMP}/rendered" 2>&1 | tee /tmp/${{ github.run_id }}.render.txt
+      - name: kubeconform
+        id: kubeconform
+        run: |
+          kubeconform -summary \
+            -schema-location default \
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            "apps/${APP}.yaml" "${RUNNER_TEMP}/rendered" 2>&1 | tee /tmp/${{ github.run_id }}.kubeconform.txt
+      - name: post comment
+        if: always()
+        uses: backstage-technical-services/eks-k8s/.github/actions/post-comment@main
+        env:
+          STEP_RENDER_OUTCOME: ${{ steps.render.outcome }}
+          STEP_KUBECONFORM_OUTCOME: ${{ steps.kubeconform.outcome }}
+        with:
+          command: kubeconform
+          app: ${{ matrix.app }}
+          pr-number: ${{ github.event.pull_request.number }}
+          steps-json: '[{"name":"render"},{"name":"kubeconform"}]'
+
+  kyverno:
+    name: Kyverno
+    runs-on: ubuntu-latest
+    needs: [app-matrix]
+    if: ${{ needs.app-matrix.outputs.matrix != '[]' }}
+    permissions:
+      contents: read
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJSON(needs.app-matrix.outputs.matrix) }}
+    env:
+      APP: ${{ matrix.app }}
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          allow-unsafe-pr-checkout: true
+          persist-credentials: false
+      - name: Use trusted files from main
+        run: |
+          git fetch --depth=1 origin "${GITHUB_SHA}"
+          git restore --source=FETCH_HEAD --staged --worktree -- scripts
+      - uses: azure/setup-helm@v5
+      - uses: kyverno/action-install-cli@v0.2.0
+        with:
+          release: v1.19.2
+      - name: render
+        id: render
+        run: scripts/render.sh "apps/${APP}.yaml" "${RUNNER_TEMP}/rendered" 2>&1 | tee /tmp/${{ github.run_id }}.render.txt
+      - name: kyverno
+        id: kyverno
+        run: |
+          {
+            kyverno apply policies/*.yaml --resource "apps/${APP}.yaml" --resource "${RUNNER_TEMP}/rendered"
+            if [ -s "${RUNNER_TEMP}/rendered/manifests.yaml" ]; then
+              kyverno apply policies/kustomize --resource "${RUNNER_TEMP}/rendered/manifests.yaml"
+            fi
+          } 2>&1 | tee /tmp/${{ github.run_id }}.kyverno.txt
+      - name: post comment
+        if: always()
+        uses: backstage-technical-services/eks-k8s/.github/actions/post-comment@main
+        env:
+          STEP_RENDER_OUTCOME: ${{ steps.render.outcome }}
+          STEP_KYVERNO_OUTCOME: ${{ steps.kyverno.outcome }}
+        with:
+          command: kyverno
+          app: ${{ matrix.app }}
+          pr-number: ${{ github.event.pull_request.number }}
+          steps-json: '[{"name":"render"},{"name":"kyverno"}]'
+
+  yamllint:
+    name: yamllint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          allow-unsafe-pr-checkout: true
+          persist-credentials: false
+      - run: yamllint --format github .
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          allow-unsafe-pr-checkout: true
+          persist-credentials: false
+      - run: git ls-files '*.sh' | xargs -r shellcheck --norc
+
+  pr-check:
+    name: PR check
+    runs-on: ubuntu-latest
+    needs: [app-matrix, kubeconform, kyverno, yamllint, shellcheck]
+    if: always()
+    steps:
+      - if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1

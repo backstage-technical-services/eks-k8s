@@ -1,0 +1,14 @@
+extends: default
+
+ignore: |
+  .agents/
+  .claude/
+
+rules:
+  document-start: disable
+  line-length: disable
+  truthy:
+    check-keys: false
+  quoted-strings:
+    quote-type: single
+    required: false

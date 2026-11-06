@@ -1,0 +1,17 @@
+# Anything not listed below (README, agent instructions, lint config, etc.) can be approved by anyone in the org
+
+# App config: needs some Kubernetes knowledge
+/apps/      @backstage-technical-services/devops
+/databases/ @backstage-technical-services/devops
+/platform/  @backstage-technical-services/devops
+/services/  @backstage-technical-services/devops
+
+# Needs @bnjns: permissions, anything with cluster-wide access, and the checks that guard them
+/platform/rbac/                 @bnjns
+/platform/tailscale/            @bnjns
+/apps/platform/tailscale.yaml   @bnjns
+/policies/                      @bnjns
+/.github/workflows/             @bnjns
+/.github/actions/               @bnjns
+/scripts/                       @bnjns
+/.github/CODEOWNERS             @bnjns
