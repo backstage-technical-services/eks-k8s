@@ -1,0 +1,48 @@
+name: Post PR comment
+description: Build and upsert a check PR comment
+
+inputs:
+  command:
+    description: check command (kubeconform or kyverno)
+    required: true
+  app:
+    description: app path (matrix app)
+    required: true
+  steps-json:
+    description: JSON array of step definitions
+    required: true
+  pr-number:
+    description: PR number to post the comment on
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: build comment
+      id: build-comment
+      uses: actions/github-script@v9
+      env:
+        APP_NAME: ${{ inputs.app }}
+      with:
+        github-token: ${{ github.token }}
+        result-encoding: string
+        script: |
+          const { buildComment } = require('./scripts/actions-helpers.js');
+          const steps = JSON.parse('${{ inputs.steps-json }}');
+
+          return buildComment({
+            context,
+            core,
+            command: '${{ inputs.command }}',
+            appName: process.env.APP_NAME,
+            steps,
+          });
+
+    - name: post comment
+      continue-on-error: true
+      uses: thollander/actions-comment-pull-request@v3
+      with:
+        file-path: ${{ steps.build-comment.outputs.result }}
+        comment-tag: ${{ inputs.command }}-${{ inputs.app }}
+        mode: upsert
+        pr-number: ${{ inputs.pr-number }}

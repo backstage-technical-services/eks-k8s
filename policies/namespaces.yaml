@@ -1,0 +1,38 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: namespaces
+spec:
+  rules:
+    - name: no-namespace-objects
+      match:
+        any:
+          - resources:
+              kinds: ['Namespace']
+      validate:
+        failureAction: Enforce
+        message: 'Namespaces are created by the cluster owner'
+        deny: {}
+    - name: backstage-namespaces
+      match:
+        any:
+          - resources:
+              kinds: ['*']
+      exclude:
+        any:
+          - resources:
+              kinds:
+                - 'Application'
+                - 'ClusterRole'
+                - 'ClusterRoleBinding'
+                - 'CustomResourceDefinition'
+                - 'IngressClass'
+                - 'Namespace'
+                - 'PersistentVolume'
+                - 'ProxyClass'
+      validate:
+        failureAction: Enforce
+        message: 'Set metadata.namespace to backstage or backstage-tailscale'
+        pattern:
+          metadata:
+            namespace: 'backstage | backstage-tailscale'

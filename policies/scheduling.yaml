@@ -1,0 +1,23 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: scheduling
+spec:
+  rules:
+    - name: backstage-node-group
+      match:
+        any:
+          - resources:
+              kinds: ['Pod']
+      validate:
+        failureAction: Enforce
+        message: 'Pods must select and tolerate the backstage node group'
+        pattern:
+          spec:
+            nodeSelector:
+              bnjns.uk/owner: 'backstage'
+            ^(tolerations):
+              - key: 'bnjns.uk/reserved-for'
+                operator: 'Equal'
+                value: 'backstage'
+                effect: 'NoSchedule'

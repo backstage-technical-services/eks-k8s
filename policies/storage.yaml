@@ -1,0 +1,52 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: storage
+spec:
+  rules:
+    - name: retain
+      match:
+        any:
+          - resources:
+              kinds: ['PersistentVolume']
+      validate:
+        failureAction: Enforce
+        message: 'PersistentVolumes must set persistentVolumeReclaimPolicy: Retain'
+        pattern:
+          spec:
+            persistentVolumeReclaimPolicy: 'Retain'
+    - name: storage-class
+      match:
+        any:
+          - resources:
+              kinds: ['PersistentVolume']
+      validate:
+        failureAction: Enforce
+        message: 'PersistentVolumes must use the aws-efs storage class'
+        pattern:
+          spec:
+            storageClassName: 'aws-efs'
+    - name: backstage-data-access-point
+      match:
+        any:
+          - resources:
+              kinds: ['PersistentVolume']
+      validate:
+        failureAction: Enforce
+        message: 'PersistentVolumes must use an access point on the backstage-data filesystem (fs-05929b3d75352ac77)'
+        pattern:
+          spec:
+            csi:
+              volumeHandle: 'fs-05929b3d75352ac77::*'
+    - name: no-prune-annotation
+      match:
+        any:
+          - resources:
+              kinds: ['PersistentVolume']
+      validate:
+        failureAction: Enforce
+        message: 'PersistentVolumes must be annotated with argocd.argoproj.io/sync-options: Delete=false,Prune=false'
+        pattern:
+          metadata:
+            annotations:
+              argocd.argoproj.io/sync-options: 'Delete=false,Prune=false'
