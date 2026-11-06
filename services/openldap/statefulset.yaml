@@ -45,6 +45,7 @@ spec:
           envFrom:
             - secretRef:
                 name: openldap
+                optional: false
           resources:
             requests:
               memory: '128Mi'
