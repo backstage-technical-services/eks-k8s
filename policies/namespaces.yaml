@@ -3,6 +3,7 @@ kind: ClusterPolicy
 metadata:
   name: namespaces
 spec:
+  background: false
   rules:
     - name: no-namespace-objects
       match:
