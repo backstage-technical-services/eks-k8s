@@ -125,7 +125,11 @@ jobs:
         id: kyverno
         run: |
           {
-            kyverno apply policies/*.yaml --resource "apps/${APP}.yaml" --resource "${RUNNER_TEMP}/rendered"
+            resources=(--resource "apps/${APP}.yaml")
+            for file in "${RUNNER_TEMP}"/rendered/*.yaml; do
+              resources+=(--resource "${file}")
+            done
+            kyverno apply policies/*.yaml "${resources[@]}"
             if [ -s "${RUNNER_TEMP}/rendered/manifests.yaml" ]; then
               kyverno apply policies/kustomize --resource "${RUNNER_TEMP}/rendered/manifests.yaml"
             fi

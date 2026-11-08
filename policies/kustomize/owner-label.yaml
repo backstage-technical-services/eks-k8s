@@ -3,6 +3,7 @@ kind: ClusterPolicy
 metadata:
   name: owner-label
 spec:
+  background: false
   rules:
     - name: owner-label
       match:
