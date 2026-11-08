@@ -22,4 +22,4 @@ configMapGenerator:
 
 images:
   - name: alpine/k8s
-    newTag: '1.36.6'
+    newTag: '1.37.2'
