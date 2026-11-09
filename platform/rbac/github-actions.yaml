@@ -43,7 +43,7 @@ rules:
     resources: ['certificates']
     verbs: ['list', 'get', 'watch']
   - apiGroups: ['traefik.io']
-    resources: ['ingressroutes']
+    resources: ['ingressroutes', 'middlewares']
     verbs: ['list', 'get', 'watch']
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -84,7 +84,7 @@ rules:
     resources: ['certificates']
     verbs: ['*']
   - apiGroups: ['traefik.io']
-    resources: ['ingressroutes']
+    resources: ['ingressroutes', 'middlewares']
     verbs: ['*']
 ---
 apiVersion: rbac.authorization.k8s.io/v1
