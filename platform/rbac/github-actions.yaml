@@ -19,32 +19,11 @@ metadata:
   name: 'backstage:github-actions'
 rules:
   - apiGroups: ['']
-    resources: ['persistentvolumes', 'persistentvolumeclaims']
+    resources: ['persistentvolumes']
     verbs: ['*']
   - apiGroups: ['certificates.k8s.io']
     resources: ['certificatesigningrequests']
     verbs: ['create', 'get']
-  - apiGroups: ['']
-    resources: ['services', 'secrets', 'configmaps']
-    verbs: ['list', 'get', 'watch']
-  - apiGroups: ['apps']
-    resources: ['deployments', 'replicasets', 'statefulsets']
-    verbs: ['list', 'get', 'watch']
-  - apiGroups: ['batch']
-    resources: ['cronjobs']
-    verbs: ['list', 'get', 'watch']
-  - apiGroups: ['networking.k8s.io']
-    resources: ['ingresses']
-    verbs: ['list', 'get', 'watch']
-  - apiGroups: ['external-secrets.io']
-    resources: ['externalsecrets']
-    verbs: ['list', 'get', 'watch']
-  - apiGroups: ['cert-manager.io']
-    resources: ['certificates']
-    verbs: ['list', 'get', 'watch']
-  - apiGroups: ['traefik.io']
-    resources: ['ingressroutes', 'middlewares']
-    verbs: ['list', 'get', 'watch']
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -65,26 +44,8 @@ metadata:
   name: 'backstage:github-actions'
   namespace: backstage
 rules:
-  - apiGroups: ['']
-    resources: ['services', 'secrets', 'configmaps']
-    verbs: ['*']
-  - apiGroups: ['apps']
-    resources: ['replicasets', 'statefulsets', 'deployments']
-    verbs: ['*']
-  - apiGroups: ['batch']
-    resources: ['cronjobs']
-    verbs: ['*']
-  - apiGroups: ['networking.k8s.io']
-    resources: ['ingresses']
-    verbs: ['*']
-  - apiGroups: ['external-secrets.io']
-    resources: ['externalsecrets']
-    verbs: ['*']
-  - apiGroups: ['cert-manager.io']
-    resources: ['certificates']
-    verbs: ['*']
-  - apiGroups: ['traefik.io']
-    resources: ['ingressroutes', 'middlewares']
+  - apiGroups: ['*']
+    resources: ['*']
     verbs: ['*']
 ---
 apiVersion: rbac.authorization.k8s.io/v1
