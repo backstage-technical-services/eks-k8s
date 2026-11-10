@@ -22,7 +22,7 @@ AWS resources, including SSM parameters and EFS access points, are in
 | Path | Contents |
 | --- | --- |
 | `apps/` | Argo CD `Application` manifests, one per app |
-| `platform/` | RBAC, the Tailscale operator and Traefik middlewares |
+| `platform/` | RBAC, the Tailscale operator, Traefik middlewares and StorageClasses |
 | `databases/` | Shared database servers |
 | `services/` | Supporting services (mail catcher, LDAP) |
 
@@ -39,7 +39,7 @@ something new.
 | Wave | Role |
 | --- | --- |
 | `0` | RBAC |
-| `10` | Platform services (Tailscale operator, Traefik middlewares) |
+| `10` | Platform services (Tailscale operator, Traefik middlewares, StorageClasses) |
 | `20` | Databases |
 | `30` | Services |
 

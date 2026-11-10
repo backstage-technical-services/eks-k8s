@@ -10,6 +10,8 @@
 /platform/rbac/                 @bnjns
 /platform/tailscale/            @bnjns
 /apps/platform/tailscale.yaml   @bnjns
+/platform/storage/              @bnjns
+/apps/platform/storage.yaml     @bnjns
 /policies/                      @bnjns
 /.github/workflows/             @bnjns
 /.github/actions/               @bnjns
