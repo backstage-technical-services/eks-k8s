@@ -50,3 +50,14 @@ spec:
           metadata:
             annotations:
               argocd.argoproj.io/sync-options: 'Delete=false,Prune=false'
+    - name: backstage-data-storage-class
+      match:
+        any:
+          - resources:
+              kinds: ['StorageClass']
+      validate:
+        failureAction: Enforce
+        message: 'StorageClasses must provision on the backstage-data filesystem (fs-05929b3d75352ac77)'
+        pattern:
+          parameters:
+            fileSystemId: 'fs-05929b3d75352ac77'

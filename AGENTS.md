@@ -110,6 +110,10 @@ Volumes are static: a `PersistentVolume` per access point, bound by a `Persisten
 - Annotate every `PersistentVolume` with `argocd.argoproj.io/sync-options: 'Delete=false,Prune=false'`.
 - Access points are created outside this repo; ask for the ID rather than inventing one.
 
+CloudNativePG clusters are the exception: set `storage.storageClass: aws-efs-backstage-postgres` on the `Cluster`, and
+its volumes are provisioned dynamically on `backstage-data`. Each gets its own access point, running as uid/gid `26`
+(CloudNativePG's `postgres` user), in a `backstage/<pvc-name>` directory that is kept when the volume is deleted.
+
 ## Exposure
 
 - **Tailscale**: annotate a `Service` to expose it on the tailnet through the operator in `backstage-tailscale`.

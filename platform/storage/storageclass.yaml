@@ -1,0 +1,16 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: aws-efs-backstage-postgres
+provisioner: efs.csi.aws.com
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+allowVolumeExpansion: true
+parameters:
+  provisioningMode: 'efs-ap'
+  fileSystemId: 'fs-05929b3d75352ac77'
+  directoryPerms: '700'
+  uid: '26'
+  gid: '26'
+  subPathPattern: '${.PVC.namespace}/${.PVC.name}'
+  ensureUniqueDirectory: 'false'
